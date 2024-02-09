@@ -57,4 +57,38 @@ class Maze:
         self._cells[self._num_cols-1][self._num_rows-1].has_bottom_wall = False
         self._draw_cell(self._num_cols-1,self._num_rows-1)
 
-        
+    def _get_adjacent_cells(self,i,j):
+        adj = []
+        if j-1 < self._num_rows and j-1 >= 0:
+            adj.append([i,j-1])
+        if i-1 < self._num_cols and i-1 >= 0:
+            adj.append([i+1,j])
+        if i+1 < self._num_cols and i+1 >= 0:
+            adj.append([i+1,j])
+        if j+1 < self._num_rows and j+1 >= 0:
+            adj.append([i,j+1])  
+        return adj  
+
+    def _break_wall_r(self,i,j,seed = None):
+        random.seed(seed)
+        self._cells[i][j].visited = True
+        running = True
+        while running:
+            #list with adjacent cells
+            to_visit = self._get_adjacent_cells(i,j)
+            #list with not visited cells
+            for cell in to_visit:
+                if self._cell[cell[0]][cell[1]].visited == True:
+                    to_visit.remove(cell)
+            #if no directions possible, return and draw current cell
+            if len(to_visit) == 0:
+                self._draw_cell(i,j)
+                return
+            #pick random direction
+            direction = random.randint(0,len(to_visit)-1)
+            travel_cell = to_visit[direction]
+            #knock down wall between the cells
+
+
+            
+            
