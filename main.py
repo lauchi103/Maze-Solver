@@ -1,5 +1,6 @@
 from graphics import Window
 from maze import Maze
+import time
 
 
 def main():
@@ -12,8 +13,10 @@ def main():
     cell_size_y = (screen_y - 2 * margin) / num_rows
     win = Window(screen_x, screen_y)
 
-    maze = Maze(margin, margin, num_rows, num_cols, cell_size_x, cell_size_y, win)
-
+    maze = Maze(margin, margin, num_rows, num_cols, cell_size_x, cell_size_y, win,seed = 1)
+    maze._break_entrance_and_exit()
+    maze._break_wall_r(0,0,)
+    time.sleep(10)
     win.wait_for_close()
 
 

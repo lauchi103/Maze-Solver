@@ -13,6 +13,7 @@ class Maze:
         cell_size_x,
         cell_size_y,
         win = None,
+        seed = None
     ):
         self._cells = []
         self._x1 = x1
@@ -22,6 +23,8 @@ class Maze:
         self._cell_size_x = cell_size_x
         self._cell_size_y = cell_size_y
         self._win = win
+        if seed:
+            random.seed(seed)
 
         self._create_cells()
 
@@ -57,38 +60,58 @@ class Maze:
         self._cells[self._num_cols-1][self._num_rows-1].has_bottom_wall = False
         self._draw_cell(self._num_cols-1,self._num_rows-1)
 
-    def _get_adjacent_cells(self,i,j):
-        adj = []
-        if j-1 < self._num_rows and j-1 >= 0:
-            adj.append([i,j-1])
-        if i-1 < self._num_cols and i-1 >= 0:
-            adj.append([i+1,j])
-        if i+1 < self._num_cols and i+1 >= 0:
-            adj.append([i+1,j])
-        if j+1 < self._num_rows and j+1 >= 0:
-            adj.append([i,j+1])  
-        return adj  
-
-    def _break_wall_r(self,i,j,seed = None):
-        random.seed(seed)
+    def _break_wall_r(self,i,j):
         self._cells[i][j].visited = True
         running = True
         while running:
+            next_index_list = []
             #list with adjacent cells
-            to_visit = self._get_adjacent_cells(i,j)
-            #list with not visited cells
-            for cell in to_visit:
-                if self._cell[cell[0]][cell[1]].visited == True:
-                    to_visit.remove(cell)
+             # determine which cell(s) to visit next
+            # left
+            if i > 0 and not self._cells[i - 1][j].visited:
+                next_index_list.append((i - 1, j))
+            # right
+            if i < self._num_cols - 1 and not self._cells[i + 1][j].visited:
+                next_index_list.append((i + 1, j))
+            # up
+            if j > 0 and not self._cells[i][j - 1].visited:
+                next_index_list.append((i, j - 1))
+            # down
+            if j < self._num_rows - 1 and not self._cells[i][j + 1].visited:
+                next_index_list.append((i, j + 1))
             #if no directions possible, return and draw current cell
-            if len(to_visit) == 0:
+            if len(next_index_list) == 0:
                 self._draw_cell(i,j)
                 return
             #pick random direction
-            direction = random.randint(0,len(to_visit)-1)
-            travel_cell = to_visit[direction]
+            direction = random.randrange(len(next_index_list))
+            next_index = next_index_list[direction]
+            
             #knock down wall between the cells
-
+            x_diff = next_index[0] - i
+            y_diff = next_index[1] -j
+            
+            match (x_diff,y_diff):
+                case (0,-1):
+                    self._cells[i][j].has_top_wall = False
+                    self._cells[i+x_diff][j+y_diff].has_bottom_wall = False
+                case (0,1):
+                    self._cells[i][j].has_bottom_wall = False
+                    self._cells[i+x_diff][j+y_diff].has_top_wall = False
+                case (-1,0):
+                    self._cells[i][j].has_left_wall = False
+                    self._cells[i+x_diff][j+y_diff].has_right_wall = False
+                case (1,0):
+                    self._cells[i][j].has_right_wall = False
+                    self._cells[i+x_diff][j+y_diff].has_left_wall = False
+                case _:
+                    raise Exception("Error with _break_wall_r, x_diff und y_diff unerwartet")
+            self._draw_cell(i,j)
+            self._draw_cell(i+x_diff,j+y_diff)
+            #move to next cell
+            self._break_wall_r(i+x_diff,j+y_diff)
+            
+        
 
             
             
